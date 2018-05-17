@@ -16,7 +16,7 @@ Literally anything else. You want security? Better set it up yourself.
   * cd rootdirectorywithallyournugetpackages
   * ./nugetimport.sh -k APIKEYFROMNEXUS - r http://localhost:8084/repository/nuget-hosted/
   * Watch the money roll in and the haters start askin
-  * You'll need to obtain your APIKEY for Nexus Repository, and obviously set -r to the repo path you want to us
+  * You'll need to obtain your APIKEY for Nexus Repository, and obviously set -r to the repo path you want to use
 * npm
   * npm login --registry http://localhost:8084/repository/npm-internal/
   * cd rootdirectorythatcontainsallnpmmadness
