@@ -46,6 +46,6 @@ if [[ $DELTA_DATE == "" ]]; then
 	time find . -type f -not -path './mavenimport\.sh*' -not -path '*/\.*' -not -path '*/\^archetype\-catalog\.xml*' -not -path '*/\^maven\-metadata\-local*\.xml' -not -path '*/\^maven\-metadata\-deployment*\.xml' | sed "s|^\./||" | xargs -I '{}' curl -u "${USERNAME}:${PASSWORD}" -X PUT -v -T {} ${NEXUS_URL}/repository/${REPO_NAME}/{} ;
 else
 	cd ${NEXUS_PATH}/${REPO_NAME}
-	echo "Uploading to ${REPO_NAME}"
+	echo "Uploading to ${NEXUS_URL}/${REPO_NAME}"
 	time find . -newermt ${DELTA_DATE} -type f -not -path './mavenimport\.sh*' -not -path '*/\.*' -not -path '*/\^archetype\-catalog\.xml*' -not -path '*/\^maven\-metadata\-local*\.xml' -not -path '*/\^maven\-metadata\-deployment*\.xml' | sed "s|^\./||" | xargs -I '{}' curl -u "${USERNAME}:${PASSWORD}" -X PUT -v -T {} ${NEXUS_URL}/repository/${REPO_NAME}/{} ;
 fi
