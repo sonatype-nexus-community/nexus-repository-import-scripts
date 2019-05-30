@@ -3,15 +3,61 @@
 # copy and run this script to the root of the repository directory containing files
 # this script attempts to exclude uploading itself explicitly so the script name is important
 # Get command line params
-while getopts ":r:u:p:" opt; do
+while getopts ":r:u:p:d:s:n:l:z:" opt; do
 	case $opt in
-		r) REPO_URL="$OPTARG"
+		s) NEXUS_PATH="$OPTARG" # path to ${NEXUS_HOME}/storage/
+		;;
+		n) NEXUS_URL="$OPTARG"
+		;;
+    z) REPO_DEST="$OPTARG" # in case the storage directory does not match the repo url name
+    ;;
+		r) REPO_NAME="$OPTARG" # Match repo name with dir in /storage/*
 		;;
 		u) USERNAME="$OPTARG"
 		;;
 		p) PASSWORD="$OPTARG"
 		;;
+		d) DELTA_DATE="$OPTARG" # Oldest date to find files (2019-05-29), useful if you have to run again because files were pushed to old nexus.
+		;;
+		l) LOOP="$OPTARG" # Loop through directories in ${NEXUS_HOME}/storage
+		;;
 	esac
 done
 
-find . -type f -not -path './mavenimport\.sh*' -not -path '*/\.*' -not -path '*/\^archetype\-catalog\.xml*' -not -path '*/\^maven\-metadata\-local*\.xml' -not -path '*/\^maven\-metadata\-deployment*\.xml' | sed "s|^\./||" | xargs -I '{}' curl -u "$USERNAME:$PASSWORD" -X PUT -v -T {} ${REPO_URL}/{} ;
+if [[ ${NEXUS_PATH} == "" ]]; then
+	NEXUS_PATH=${NEXUS_HOME} # if you dont set NEXUS_PATH and you have no NEXUS_HOME env var, I can't help you
+fi
+if [[ ${NEXUS_PATH} == "" ]]; then
+	exit 1
+fi
+
+if [[ ${LOOP} == "T" ]]; then
+  for DIR in `ls -l ${NEXUS_PATH}|awk '{print $9}'`
+  do
+    cd ${NEXUS_PATH}/${DIR}
+    echo "Uploading to ${NEXUS_URL}/repository/${DIR}"
+    time find . -type f -not -path './mavenimport\.sh*' -not -path '*/\.*' -not -path '*/\^archetype\-catalog\.xml*' -not -path '*/\^maven\-metadata\-local*\.xml' -not -path '*/\^maven\-metadata\-deployment*\.xml' | sed "s|^\./||" | xargs -I '{}' curl -u "${USERNAME}:${PASSWORD}" -X PUT -v -T {} ${NEXUS_URL}/repository/${DIR}/{} ;
+  done
+	exit 0 # Skip next conditionals if we loop.  No need for DELTA_DATE if you're uploading everything
+fi
+
+# Continue if LOOP!=T
+if [[ $DELTA_DATE == "" ]]; then
+	cd ${NEXUS_PATH}/${REPO_NAME}
+  if [[ ${REPO_DEST} == "" ]]; then
+    echo "Uploading to ${NEXUS_URL}/repository/${REPO_NAME}"
+	  time find . -type f -not -path './mavenimport\.sh*' -not -path '*/\.*' -not -path '*/\^archetype\-catalog\.xml*' -not -path '*/\^maven\-metadata\-local*\.xml' -not -path '*/\^maven\-metadata\-deployment*\.xml' | sed "s|^\./||" | xargs -I '{}' curl -u "${USERNAME}:${PASSWORD}" -X PUT -v -T {} ${NEXUS_URL}/repository/${REPO_NAME}/{} ;
+  else
+    echo "Uploading to ${NEXUS_URL}/repository/${REPO_DEST}"
+    time find . -type f -not -path './mavenimport\.sh*' -not -path '*/\.*' -not -path '*/\^archetype\-catalog\.xml*' -not -path '*/\^maven\-metadata\-local*\.xml' -not -path '*/\^maven\-metadata\-deployment*\.xml' | sed "s|^\./||" | xargs -I '{}' curl -u "${USERNAME}:${PASSWORD}" -X PUT -v -T {} ${NEXUS_URL}/repository/${REPO_DEST}/{} ;
+  fi
+else
+	cd ${NEXUS_PATH}/${REPO_NAME}
+  if [[ ${REPO_DEST} == "" ]]; then
+    echo "Uploading to ${NEXUS_URL}/repository/${REPO_NAME}"
+	  time find . -type f -not -path './mavenimport\.sh*' -not -path '*/\.*' -not -path '*/\^archetype\-catalog\.xml*' -not -path '*/\^maven\-metadata\-local*\.xml' -not -path '*/\^maven\-metadata\-deployment*\.xml' | sed "s|^\./||" | xargs -I '{}' curl -u "${USERNAME}:${PASSWORD}" -X PUT -v -T {} ${NEXUS_URL}/repository/${REPO_NAME}/{} ;
+  else
+    echo "Uploading to ${NEXUS_URL}/repository/${REPO_DEST}"
+    time find . -type f -not -path './mavenimport\.sh*' -not -path '*/\.*' -not -path '*/\^archetype\-catalog\.xml*' -not -path '*/\^maven\-metadata\-local*\.xml' -not -path '*/\^maven\-metadata\-deployment*\.xml' | sed "s|^\./||" | xargs -I '{}' curl -u "${USERNAME}:${PASSWORD}" -X PUT -v -T {} ${NEXUS_URL}/repository/${REPO_DEST}/{} ;
+  fi
+fi
