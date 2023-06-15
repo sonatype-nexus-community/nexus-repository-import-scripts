@@ -23,5 +23,10 @@ Literally anything else. You want security? Better set it up yourself.
   * ./npmimport.sh -r http://localhost:8084/repository/npm-internal/
   * Watch a bunch of stuff prolly fail because it has extra build steps, figure those out and then remediate if you really care
   * Set -r and --registry to the NPM hosted repo you plan to use
+* PyPi
+  * Make sure twine is installed 
+  * cd rootdirectorywithallyourwhlandtarpackages
+   ./pypiinmport.sh -u admin -p admin123 -r http://localhost:8084/repository/pypi-releases/
+   Watch twine publish the python wheel packages 
 ## Like it?
 Great, buy me a beer.
